@@ -1,0 +1,13 @@
+*.db
+*.log
+*.json
+*.csv
+*.txt
+*.jsonl
+.venv
+*.env
+.vscode
+__pycache__
+token_scrapper_old.py
+utils/__pycache__
+utils/logs/
