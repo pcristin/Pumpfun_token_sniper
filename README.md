@@ -1,7 +1,5 @@
 # PumpFun Token Parser
 
-![PumpFun Logo](./assets/logo.png) <!-- Replace with actual logo if available -->
-
 ## Table of Contents
 
 - [Overview](#overview)
