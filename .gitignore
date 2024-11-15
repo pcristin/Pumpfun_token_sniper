@@ -2,7 +2,6 @@
 *.log
 *.json
 *.csv
-*.txt
 *.jsonl
 .venv
 *.env
