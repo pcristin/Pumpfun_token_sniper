@@ -3,18 +3,27 @@ import json
 import signal
 
 from modules.rug_check import RugCheck
+from modules.trader_analytics import TraderAnalytics
 from database.database import DatabaseManager
 from websockets.exceptions import ConnectionClosedError
 from websockets.asyncio.client import connect
 
 from utils.logger_config import logger
+from config import (
+    WEBSOCKET_RECONNECT_DELAY,
+    WEBSOCKET_PING_INTERVAL,
+    MAX_SECURITY_SCORE
+)
 
 class PumpFunParser:
-    def __init__(self, ws_uri: str, reconnect_delay: int = 30, ping_interval: int = 45):
+    def __init__(self, ws_uri: str, trader_analytics: TraderAnalytics | None = None, 
+                 reconnect_delay: int = WEBSOCKET_RECONNECT_DELAY, 
+                 ping_interval: int = WEBSOCKET_PING_INTERVAL):
         self.ws_uri = ws_uri
         self.reconnect_delay = reconnect_delay
         self.ping_interval = ping_interval
         self.rug_check = RugCheck()
+        self.trader_analytics = trader_analytics
         self.db_manager = DatabaseManager()
         self.ws = None
         self.shutdown_event = asyncio.Event()
@@ -38,7 +47,20 @@ class PumpFunParser:
             if not token_data or not await self.passes_security_filters(token_data):
                 logger.error(f"Token {mint} failed security filters.", extra={'module_name': 'PumpFun','token_name': data.get('name', 'N/A')})
                 return
+            
             self.db_manager.store_token(token_data)
+            
+            # Analyze top traders if trader analytics is available
+            if self.trader_analytics:
+                try:
+                    top_traders = await self.trader_analytics.get_top_traders(mint)
+                    if top_traders:
+                        self.trader_analytics.store_trader_analysis(mint, top_traders)
+                        logger.info(f"Stored trader analysis for {len(top_traders)} traders", 
+                                  extra={'module_name': 'PumpFun', 'token_name': data.get('name', 'N/A')})
+                except Exception as e:
+                    logger.error(f"Failed to analyze traders: {str(e)}", 
+                               extra={'module_name': 'PumpFun', 'token_name': data.get('name', 'N/A')})
 
     async def subscribe(self, ws):
         payload = {"method": "subscribeNewToken"}
@@ -89,7 +111,7 @@ class PumpFunParser:
             await self.listen()
 
     async def passes_security_filters(self, token_data):
-        if token_data.get('score', None) <= 5000:
+        if token_data.get('score', None) <= MAX_SECURITY_SCORE:
             return True
         return False
 

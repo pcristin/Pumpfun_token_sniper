@@ -21,7 +21,8 @@ PumpFun Token Parser is a Python-based application designed to monitor and analy
 
 - **Real-Time Monitoring**: Connects to PumpFun's WebSocket to receive live token data.
 - **Risk Analysis**: Utilizes the RugCheck API to evaluate the security and reliability of tokens.
-- **Database Integration**: Stores validated tokens along with their risk profiles using SQLAlchemy.
+- **Trader Analytics**: Analyzes top traders for new tokens using Solscan API, tracking their performance metrics and trading patterns.
+- **Database Integration**: Stores validated tokens and trader analytics data using SQLAlchemy.
 - **Graceful Shutdown**: Handles system signals to ensure smooth termination without data loss.
 - **Comprehensive Logging**: Implements a centralized logging system with color-coded console output for easy debugging and monitoring.
 
@@ -31,9 +32,10 @@ The application consists of the following core components:
 
 1. **WebSocket Client (`new_pumpfun_parser.py`)**: Connects to the WebSocket, subscribes to new token events, and handles incoming messages.
 2. **Risk Analyzer (`rug_check.py`)**: Interfaces with the RugCheck API to analyze the risks associated with each token.
-3. **Database Manager (`database.py`)**: Manages database connections and operations using SQLAlchemy.
-4. **Logging Configuration (`utils/logger_config.py`)**: Sets up centralized logging with file and console handlers.
-5. **Main Application (`main.py`)**: Initializes and orchestrates the parser.
+3. **Trader Analytics (`trader_analytics.py`)**: Analyzes top traders for new tokens using Solscan API, tracking metrics like transaction volume, success rate, and trading patterns.
+4. **Database Manager (`database.py`)**: Manages database connections and operations using SQLAlchemy.
+5. **Logging Configuration (`utils/logger_config.py`)**: Sets up centralized logging with file and console handlers.
+6. **Main Application (`main.py`)**: Initializes and orchestrates the parser and trader analytics.
 
 ## Installation
 
@@ -87,6 +89,12 @@ ws_uri = "wss://pumpportal.fun/api/data"
 ```
 You can change this URI to connect to a different PumpFun instance or a local development environment.
 
+### Solscan API Configuration
+The application can use Solscan's API for trader analytics. You can configure the API key in `main.py`:
+```python
+trader_analytics = TraderAnalytics(api_key="your_solscan_api_key")  # Optional, works without API key but with rate limits
+```
+
 ### Database Configuration
 The application uses SQLAlchemy to manage database connections. By default, it connects to a SQLite database file named `pumpfun_tokens.db` located in the root directory. You can modify the database URI in `database.py` to connect to a different database or remote server.
 ```python
@@ -125,6 +133,56 @@ Logs are managed centrally via `utils/logger_config.py`. Logs are saved in the `
 - **CRITICAL**: Red with white background
 
 ## Usage
+
+### Command-Line Options
+
+The application supports the following command-line options:
+
+```bash
+python main.py [--api-key YOUR_SOLSCAN_API_KEY]
+```
+
+- `--api-key`: Optional Solscan API key for higher rate limits
+
+### Interactive Menu
+
+When you run the application, you'll be presented with an interactive menu with the following options:
+
+1. **Monitor New Tokens (Real-time)**
+   - Connects to PumpFun's WebSocket
+   - Monitors new token launches in real-time
+   - Analyzes token security using RugCheck
+   - Tracks top traders using Solscan (if enabled)
+   - Stores all data in the database
+
+2. **Analyze Specific Token**
+   - Analyzes trader behavior for a specific token address
+   - Shows detailed metrics for top traders:
+     - Wallet address
+     - Current token balance
+     - Total transaction count
+     - Successful/failed trades ratio
+     - Number of unique tokens traded
+
+3. **Exit**
+   - Gracefully shuts down the application
+
+### Example Usage
+
+1. Start with Solscan API key:
+```bash
+python main.py --api-key your_solscan_api_key
+```
+
+2. Start without API key (rate-limited):
+```bash
+python main.py
+```
+
+3. Analyze a specific token:
+   - Select option 2 from the menu
+   - Enter the token's address when prompted
+   - View the analysis results
 
 ### Running the Application
 
