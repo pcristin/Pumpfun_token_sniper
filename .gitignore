@@ -10,3 +10,4 @@ __pycache__
 token_scrapper_old.py
 utils/__pycache__
 utils/logs/
+solsnifer_test.py

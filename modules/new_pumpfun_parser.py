@@ -1,11 +1,8 @@
 import asyncio
 import json
-import logging
 import signal
-import sys
 
-from websockets.client import ClientProtocol
-from rug_check import RugCheck
+from modules.rug_check import RugCheck
 from database import DatabaseManager
 from websockets.exceptions import ConnectionClosedError
 from websockets.asyncio.client import connect
@@ -33,13 +30,13 @@ class PumpFunParser:
 
     async def handle_message(self, message: str):
         data = json.loads(message)
-        logger.debug(f"Received data: {data}", extra={'token_name': data.get('name', 'N/A')})
+        logger.debug(f"Received data: {data}", extra={'module_name': 'PumpFun', 'token_name': data.get('name', 'N/A')})
         
         mint = data.get('mint')
         if mint:
             token_data = await self.rug_check.analyze_token(mint)
             if not token_data or not await self.passes_security_filters(token_data):
-                logger.error(f"Token {mint} failed security filters.", extra={'token_name': data.get('name', 'N/A')})
+                logger.error(f"Token {mint} failed security filters.", extra={'module_name': 'PumpFun','token_name': data.get('name', 'N/A')})
                 return
             self.db_manager.store_token(token_data)
 

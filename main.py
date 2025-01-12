@@ -1,5 +1,5 @@
 import asyncio
-from new_pumpfun_parser import PumpFunParser
+from modules.new_pumpfun_parser import PumpFunParser
 import sys
 
 from utils.logger_config import logger  # Centralized logger

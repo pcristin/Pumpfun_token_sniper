@@ -1,7 +1,5 @@
 import aiohttp
 import asyncio
-import logging
-import json
 
 from utils.logger_config import logger  # Centralized logger
 
