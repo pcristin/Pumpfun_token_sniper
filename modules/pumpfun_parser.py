@@ -3,7 +3,7 @@ import json
 import signal
 
 from modules.rug_check import RugCheck
-from database import DatabaseManager
+from database.database import DatabaseManager
 from websockets.exceptions import ConnectionClosedError
 from websockets.asyncio.client import connect
 
